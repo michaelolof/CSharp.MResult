@@ -1,0 +1,5 @@
+.vscode
+MResult/bin
+MResult/obj
+MResult.Tests/bin
+MResult.Tests/obj
