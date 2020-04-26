@@ -36,26 +36,77 @@ namespace Michaelolof.MResult
     public bool IsErr => this.type == ResultType.Err;
 
 
-    public Result<TV, TE> Transform<TV, TE>( TV val, TE err ) => IsOk ? new Result<TV, TE>(val) : new Result<TV, TE>(err);
-
 
     #region Match Method Overloads
+
+    public Result<TV, TE> Match<TV, TE>(TV onOk, TE onErr) => IsOk ? Result<TV,TE>.Ok( onOk ) : Result<TV,TE>.Err( onErr );
+
+    public Result<TV, TE> Match<TV, TE>(TV onOk, Func<E, TE> onErr) 
+    {
+      if( IsOk ) return Result<TV, TE>.Ok( onOk );
+      else return Result<TV, TE>.Err( onErr( err ) );
+    }
+
+    public Result<TV, TE> Match<TV, TE>(Func<V, TV> onOk, TE onErr)
+    {
+      if( IsOk ) return Result<TV, TE>.Ok( onOk( val ) );
+      else return Result<TV, TE>.Err( onErr );
+    }
+
     public Result<TV, TE> Match<TV, TE>(Func<V, TV> onOk, Func<E, TE> onErr)
     {
       if( IsOk ) return new Result<TV, TE>( onOk(val) );
       else return new Result<TV, TE>( onErr(err) );
     }
 
-    public Result<TV, TE> Match<TV, TE, VE, EV>(Func<V, Result<TV,VE>> onOk, Func<E, Result<EV,TE>> onErr) where TV : class, EV where TE : class, VE
+
+    public Result<TV, TE> Match<TV, TE, VE>(Result<TV,VE> onOk, TE onErr) where TE : class, VE
     {
-      if( this.IsOk ) return this.flattenOkResult<TV, TE, VE, EV>( onOk );
-      else return this.flattenErrResult<TV, TE, VE, EV>( onErr );
+      if( IsOk ) return flattenOkResult<TV, TE, VE, E>( onOk );
+      else return Result<TV,TE>.Err( onErr );
+    }
+
+    public Result<TV, TE> Match<TV, TE, EV>(TV onOk, Result<EV, TE> onErr) where TV : class, EV
+    {
+      if( IsOk ) return Result<TV,TE>.Ok( onOk );
+      else return flattenErrResult<TV, TE, E, EV>( onErr );
+    }
+
+    public Result<TV, TE> Match<TV, TE, VE>(Result<TV,VE> onOk, Func<E, TE> onErr) where TE : class, VE
+    {
+      if( IsOk ) return flattenOkResult<TV, TE, VE, E>( onOk );
+      else return Result<TV, TE>.Err( onErr( err ) );
+    }
+
+    public Result<TV, TE> Match<TV, TE, EV>(Func<V,TV> onOk, Result<EV, TE> onErr) where TV : class, EV
+    {
+      if( IsOk ) return Result<TV, TE>.Ok( onOk( val ) );
+      else return flattenErrResult<TV, TE, E, EV>( onErr );
+    }
+
+    public Result<TV, TE> Match<TV, TE, VE, EV>(Result<TV, VE> onOk, Result<EV,TE> onErr ) where TV : class, EV where TE : class, VE
+    {
+      if( IsOk ) return flattenOkResult<TV, TE, VE, EV>( onOk );
+      else return flattenErrResult<TV, TE, VE, EV>( onErr );
+    }
+
+
+    public Result<TV, TE> Match<TV, TE, VE>(Func<V, Result<TV,VE>> onOk, TE onErr) where TE : class, VE
+    {
+      if( IsOk ) return flattenOkResult<TV, TE, VE, TV>( onOk );
+      else return Result<TV, TE>.Err( onErr );    
+    }
+
+    public Result<TV, TE> Match<TV, TE, EV>(TV onOk, Func<E, Result<EV, TE>> onErr) where TV : class, EV
+    {
+      if( IsOk ) return Result<TV, TE>.Ok( onOk );
+      else return flattenErrResult<TV, TE, TE, EV>( onErr );
     }
 
     public Result<TV, TE> Match<TV, TE, VE>(Func<V, Result<TV,VE>> onOk, Func<E, TE> onErr) where TE : class, VE
     {
-      if( IsErr ) return Result<TV, TE>.Err( onErr(this.err) );
-      else return flattenOkResult<TV, TE, VE, TV>( onOk );
+      if( IsOk ) return flattenOkResult<TV, TE, VE, TV>( onOk );
+      else return Result<TV, TE>.Err( onErr(this.err) );
     }
 
     public Result<TV, TE> Match<TV, TE, EV>(Func<V, TV> onOk, Func<E, Result<EV, TE>> onErr) where TV : class, EV
@@ -63,56 +114,136 @@ namespace Michaelolof.MResult
       if( IsOk ) return Result<TV, TE>.Ok( onOk( this.val ) );
       else return flattenErrResult<TV, TE, TE, EV>( onErr );
     }
+
+    public Result<TV, TE> Match<TV, TE, VE, EV>(Func<V, Result<TV,VE>> onOk, Result<EV,TE> onErr ) where TV : class, EV where TE : class, VE
+    {
+      if( IsOk ) return flattenOkResult<TV, TE, VE, EV>( onOk( val ) );
+      else return flattenErrResult<TV, TE, VE, EV>( onErr );
+    }
+
+    public Result<TV, TE> Match<TV, TE, VE, EV>(Result<TV,VE> onOk, Func<E, Result<EV,TE>> onErr) where TV : class, EV where TE : class, VE
+    {
+      if( IsOk ) return flattenOkResult<TV, TE, VE, EV>( onOk );
+      else return flattenErrResult<TV, TE, VE, EV>( onErr( err ) );    
+    }
+
+    public Result<TV, TE> Match<TV, TE, VE, EV>(Func<V, Result<TV,VE>> onOk, Func<E, Result<EV,TE>> onErr) where TV : class, EV where TE : class, VE
+    {
+      if( IsOk ) return flattenOkResult<TV, TE, VE, EV>( onOk( val ) );
+      else return flattenErrResult<TV, TE, VE, EV>( onErr( err ) );
+    }
     #endregion
 
 
     #region OnOk Method Overloads
-    public Result<TV, E> OnOk<TV>(TV value) => Result<TV, E>.Ok( value );
-    public Result<TV, E> OnOk<TV>(Func<TV> handler) => Result<TV, E>.Ok( handler() );
-    public Result<TV, E> OnOk<TV>(Func<V, TV> handler) => Result<TV, E>.Ok( handler( this.val ) );
+    public Result<TV, E> OnOk<TV>(TV value) { 
+      if( IsErr ) return Result<TV, E>.Err( err );
+      else return Result<TV, E>.Ok( value );
+    }
+    
+    public Result<TV, E> OnOk<TV>(Func<TV> handler) { 
+      if( IsErr ) return Result<TV, E>.Err( err );
+      else return OnOk( handler() );
+    }
+
+    public Result<TV, E> OnOk<TV>(Func<V, TV> handler) { 
+      if( IsErr ) return Result<TV, E>.Err( err );
+      else return OnOk( handler( val ) );
+    }
     
     public Result<TV, E> OnOk<TV, VE>(Result<TV, VE> result) where VE : E {
+      if( IsErr ) return Result<TV, E>.Err( err );
+      
       if( result.IsErr ) return Result<TV, E>.Err( result.err );
+    
       else return Result<TV, E>.Ok( result.val );            
     }
 
-    public Result<TV, E> OnOk<TV, VE>(Func<Result<TV, VE>> handler ) where VE : E => OnOk( handler() );
+    public Result<TV, E> OnOk<TV, VE>(Func<Result<TV, VE>> handler ) where VE : E {
+      if( IsErr ) return Result<TV, E>.Err( err );
+      else return OnOk( handler() );
+    }
 
-    public Result<TV, E> OnOk<TV, VE>(Func<V, Result<TV, VE>> handler ) where VE : E => OnOk( handler( this.val ) );
+    public Result<TV, E> OnOk<TV, VE>(Func<V, Result<TV, VE>> handler ) where VE : E {
+      if( IsErr ) return Result<TV, E>.Err( err );
+      else return OnOk( handler( val ) );
+    }
     #endregion
 
 
     #region OnErr Method Overloads
-    public Result<V, TE> OnErr<TE>(Func<E, TE> handler) => Result<V, TE>.Err( handler( this.err ) );
+    public Result<V, TE> OnErr<TE>(TE err) 
+    {
+      if( IsOk ) return Result<V, TE>.Ok( val );
+      else return Result<V, TE>.Err( err );
+    }
 
-    public Result<V, TE> OnErr<TE>(Result<V,TE> result) {
+    public Result<V, TE> OnErr<TE>(Func<E, TE> handler) 
+    { 
+      if( IsOk ) return Result<V, TE>.Ok( val );
+      else return Result<V, TE>.Err( handler( err ) );
+    }
+
+    public Result<V, E> OnErr(Action<E> handler)
+    {
+      if( IsOk ) return this;
+      else { 
+        handler( err );
+        return this;
+      }
+    }
+
+    public Result<V, TE> OnErr<TE, EV>(Result<EV,TE> result) where EV : V
+    {
+      if( IsOk ) return Result<V, TE>.Ok( val );
+      else if( result.IsOk ) return Result<V, TE>.Ok( result.val );
+      else return Result<V, TE>.Err( result.err );
+    }
+
+    public Result<V, TE> OnErr<TE, EV>(Func<Result<EV, TE>> handler ) where EV : V
+    {
+      if( IsOk ) return Result<V, TE>.Ok( val );
+      var result = handler();
       if( result.IsOk ) return Result<V, TE>.Ok( result.val );
       else return Result<V, TE>.Err( result.err );
     }
 
-    public Result<V, TE> OnErr<TE>(Func<Result<V, TE>> handler ) => OnErr( handler() );
-
-    public Result<V, TE>  OnErr<TE>(Func<E, Result<V, TE>> handler ) => OnErr( handler( err ) );
+    public Result<V, TE>  OnErr<TE, EV>(Func<E, Result<EV, TE>> handler ) where EV : V
+    {
+      if( IsOk ) return Result<V, TE>.Ok( val );
+      var result = handler(err);
+      if( result.IsOk ) return Result<V, TE>.Ok( result.val );
+      else return Result<V, TE>.Err( result.err );
+    }
     #endregion
 
-    public V GetValueOrNull() => IsOk ? val : default!;
+
     public V GetValueOrDefault(V defaultVal) => IsOk ? val : defaultVal;
 
-    public E GetErrOrNull() => IsErr ? err : default!;
     public E GetErrOrDefault(E defaultErr) => IsErr ? err : defaultErr;
 
-    private Result<TV, TE> flattenOkResult<TV, TE, VE, EV>(Func<V, Result<TV,VE>> onOk) where TV : EV where TE : class, VE
+    public (V, E) GetValueAndErr() => (val, err);
+
+    private Result<TV, TE> flattenOkResult<TV, TE, VE, EV>(Func<V, Result<TV,VE>> onOk) where TE : class, VE
     {
-      var flattenedResult = onOk( this.val );
-      if( flattenedResult.IsErr ) return Result<TV, TE>.Err( flattenedResult.err as TE );
-      else return Result<TV, TE>.Ok( flattenedResult.val );
+      return flattenOkResult<TV, TE, VE, EV>( onOk( val ) );
     }
 
-    private Result<TV, TE> flattenErrResult<TV, TE, VE, EV>(Func<E, Result<EV, TE>> onErr) where TV : class, EV where TE : VE 
+    private Result<TV, TE> flattenOkResult<TV, TE, VE, EV>(Result<TV, VE> onOk) where TE : class, VE
     {
-      var flattenedResult = onErr( this.err );
-      if( flattenedResult.IsOk ) return Result<TV, TE>.Ok( flattenedResult.val as TV );
-      else return Result<TV, TE>.Err( flattenedResult.err );
+      if( onOk.IsErr ) return Result<TV, TE>.Err( (onOk.err as TE)! );
+      else return Result<TV, TE>.Ok( onOk.val );
+    }
+
+    private Result<TV, TE> flattenErrResult<TV, TE, VE, EV>(Func<E, Result<EV, TE>> onErr) where TV : class, EV 
+    {
+      return flattenErrResult<TV, TE, VE, EV>( onErr( err ) );
+    }
+
+    private Result<TV, TE> flattenErrResult<TV, TE, VE, EV>(Result<EV, TE> onErr) where TV : class, EV 
+    {
+      if( onErr.IsOk ) return Result<TV, TE>.Ok( (onErr.val as TV)! );
+      else return Result<TV, TE>.Err( onErr.err );
     }
 
   }
