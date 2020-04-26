@@ -2,7 +2,7 @@ using System;
 using Xunit;
 
 
-namespace Michaelolof.MResult.Tests
+namespace Michaelolof.Result.Tests
 {
 
   public class Resut_IsErr__Tests
