@@ -1,5 +1,5 @@
-using System;
 using Xunit;
+using System;
 
 namespace Michaelolof.MResult.Tests
 {
@@ -8,189 +8,57 @@ namespace Michaelolof.MResult.Tests
   {
 
     [Fact]
-    public void Passing_Test_When_Using_A_Value_Argument()
+    public void Should_Propagate_Value_If_Current_Result_Is_OK()
     {
-      // Arrange
-      const string value = "one two three";
-      Func<int, Result<Tokens, Exception>> ReadTokensFromDB = (id) => Result<Tokens,Exception>.Ok(new Tokens(value));
-
-      // Act
-      var tokens = ReadTokensFromDB( 20 )
-        .OnOk( "transformed-ok" );
-
-      var (val, err) = tokens.GetValueAndErr();
-
-      // Assert
-      Assert.True( val == "transformed-ok" );
-      Assert.True( val != value );
-      Assert.True( err == null );
-    }
-
-    [Fact]
-    public void Failing_Test_When_Using_A_Value_Argument()
-    {
-      const string errMsg = "Not Found In DB";
-      Func<int, Result<Tokens, Exception>> ReadTokensFromDB = (id) => Result<Tokens,Exception>.Err(new Exception(errMsg));
-
-      // Act
-      var tokens = ReadTokensFromDB( 20 )
-        .OnOk( "not-using" );
-
-      var (val, err) = tokens.GetValueAndErr();
-
-      // Assert
-      Assert.True( val == null );
-      Assert.True( err is Exception );
-      Assert.True( err.Message == errMsg );
-    }
-
-    [Fact]
-    public void Passing_Test_When_Using_A_Parameterless_Callback_Argument()
-    {
-      // Arrange
-      const string value = "one two three";
-      Func<int, Result<Tokens, Exception>> ReadTokensFromDB = (id) => Result<Tokens,Exception>.Ok(new Tokens(value));
-      Func<string> GetValue = () => "transformed-ok";
-
-      // Act
-      var tokens = ReadTokensFromDB( 20 )
-        .OnOk(() => GetValue() );
-
-      var (val, err) = tokens.GetValueAndErr();
-
-      // Assert
-      Assert.True( val == "transformed-ok" );
-      Assert.True( val != value );
-      Assert.True( err == null );      
-    }
-
-    [Fact]
-    public void Failing_Test_When_Using_A_Parameterless_Callback_Argument()
-    {
-      // Arrange
-      Func<int, Result<Tokens, Exception>> ReadTokensFromDB = (id) => Result<Tokens,Exception>.Err(new Exception("Not found in DB"));
-      Func<string> GetValue = () => "transformed-ok";
-
-      // Act
-      var tokens = ReadTokensFromDB( 20 )
-        .OnOk(() => GetValue() );
-
-      var (val, err) = tokens.GetValueAndErr();
-
-      // Assert
-      Assert.True( val == null );
-      Assert.True( err is Exception );
-      Assert.True( err.Message == "Not found in DB" );
-    }
-
-    [Fact]
-    public void Passing_Test_When_Using_A_Callback_With_One_Argument()
-    {
-      // Arrange
-      Func<int, Result<Tokens, Exception>> ReadTokensFromDB = (id) => Result<Tokens,Exception>.Ok(new Tokens());
-      Func<Tokens, string> GetValue = (t) => "transformed-ok";
-
-      // Act
-      var tokens = ReadTokensFromDB( 20 )
-        .OnOk( toks => GetValue(toks) );
+      // Base
+      var currentResult = Result<int,Exception>.Ok( 20 );
       
-      var (val, err) = tokens.GetValueAndErr();
-
-      // Assert
-      Assert.True( val == "transformed-ok");
-      Assert.True( err == null );
-    }
-
-    [Fact]
-    public void Failing_Test_When_Using_A_Callback_With_One_Argument()
-    {
-      // Arrange
-      Func<int, Result<Tokens, Exception>> ReadTokensFromDB = (id) => Result<Tokens,Exception>.Err(new Exception("Nothing"));
-      Func<Tokens, string> GetValue = (t) => "transformed-ok";
+      // Arrange (Test all supported overloads)
+      var resultOne = currentResult.OnOk( "Test" );
+      var resultTwo = currentResult.OnOk( () => "Test" );
+      var resultThree = currentResult.OnOk( b => b + 5 );
+      var resultFour = currentResult.OnOk( v => Console.WriteLine($"Value is {v}") );
 
       // Act
-      var tokens = ReadTokensFromDB( 20 )
-        .OnOk( toks => GetValue(toks) );
-      
-      var (val, err) = tokens.GetValueAndErr();
+      var (valOne, errOne) = resultOne.GetValueAndErr();
+      var (valTwo, errTwo) = resultTwo.GetValueAndErr();
+      var (valThree, errThree) = resultThree.GetValueAndErr();
+      var (valFour, errFour) = resultFour.GetValueAndErr();
 
       // Assert
-      Assert.True( val == null);
-      Assert.True( err.Message == "Nothing" );
+      Assert.True( valOne == "Test" && errOne == null );
+      Assert.True( valTwo == "Test" && errTwo == null );
+      Assert.True( valThree == 25 && errThree == null );
+      Assert.True( valFour == 20 && errFour == null );
 
     }
 
     [Fact]
-    public void Passing_Test_When_Returning_A_Result_Value()
+    public void Should_Not_Propagate_Value_If_Current_Result_Is_Err()
     {
-      // Arrange
-      Func<int, Result<Tokens, Exception>> ReadTokensFromDB = (id) => Result<Tokens,Exception>.Ok( new Tokens() );
-      Func<Tokens, Result<int, Exception>> StoreTokensToDB = (tks) => Result<int,Exception>.Ok( 25 );
+
+      // Base Result
+      var currentResult = Result<int, Exception>.Err( new Exception("Nothing") );
+
+      // Arrange (Test all supported overloads)
+      var resultOne = currentResult.OnOk( "Test" );
+      var resultTwo = currentResult.OnOk( () => "Test" );
+      var resultThree = currentResult.OnOk( b => b + 5 );
+      var resultFour = currentResult.OnOk( v => Console.WriteLine($"Value is {v}") );
 
       // Act
-      var tokens = ReadTokensFromDB( 20 )
-        .OnOk( toks => StoreTokensToDB( toks) );
-
-      var (val, err) = tokens.GetValueAndErr();
-
-      // Assert
-      Assert.True( val == 25 );
-      Assert.True( err == null );
-    }
-
-    [Fact]
-    public void Failing_Test_When_Returning_A_Result_Value()
-    {
-      // Arrange
-      Func<int, Result<Tokens, Exception>> ReadTokensFromDB = (id) => Result<Tokens,Exception>.Err(new Exception("Nothing"));
-      Func<Tokens, Result<int, Exception>> StoreTokensToDB = (tks) => Result<int,Exception>.Ok( 25 );
-
-      // Act
-      var tokens = ReadTokensFromDB( 20 )
-        .OnOk( toks => StoreTokensToDB( toks) );
-
-      var (val, err) = tokens.GetValueAndErr();
+      var (valOne, errOne) = resultOne.GetValueAndErr();
+      var (valTwo, errTwo) = resultTwo.GetValueAndErr();
+      var (valThree, errThree) = resultThree.GetValueAndErr();
+      var (valFour, errFour) = resultFour.GetValueAndErr();
 
       // Assert
-      Assert.True( val == 0 );
-      Assert.True( err is Exception );
+      Assert.True( valOne == null && errOne is Exception && errOne.Message == "Nothing" );
+      Assert.True( valTwo == null && errTwo is Exception && errTwo.Message == "Nothing" );
+      Assert.True( valThree == 0 && errThree is Exception && errThree.Message == "Nothing" );
+      Assert.True( valFour == 0 && errFour is Exception && errFour.Message == "Nothing" );
     }
-
-    [Fact]
-    public void Failing_Test_When_Returning_A_Result_Value_2()
-    {
-      // Arrange
-      Func<int, Result<Tokens, Exception>> ReadTokensFromDB = (id) => Result<Tokens,Exception>.Ok( new Tokens() );
-      Func<Tokens, Result<int, Exception>> StoreTokensToDB = (tks) => Result<int,Exception>.Err( new Exception("Could Not Store") );
-
-      // Act
-      var tokens = ReadTokensFromDB( 20 )
-        .OnOk( toks => StoreTokensToDB( toks) );
-
-      var (val, err) = tokens.GetValueAndErr();
-
-      // Assert
-      Assert.True( val == 0 );
-      Assert.True( err is Exception );
-      Assert.True( err.Message == "Could Not Store" );
-    }
-
-
-    class Tokens {
-      public string Value;
-
-      public Tokens()
-      {
-        Value = "tokens";
-      }
-
-      public Tokens(string value) {
-        Value = value;
-      }
-      public override string ToString() => "Tokens"; 
-    };
 
   }
-
 
 }

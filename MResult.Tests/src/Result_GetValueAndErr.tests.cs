@@ -49,7 +49,7 @@ namespace Michaelolof.MResult.Tests
 
       var (val, err) = result.GetValueAndErr();
 
-      Assert.True( val.Name == "" );
+      Assert.True( val.Name == null );
       Assert.True( err is Exception );
       Assert.True( err.Message == "Nothing" );
     }

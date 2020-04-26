@@ -150,8 +150,21 @@ namespace Michaelolof.MResult
       if( IsErr ) return Result<TV, E>.Err( err );
       else return OnOk( handler( val ) );
     }
+
+    public Result<V, E> OnOk(Action<V> handler)
+    { 
+      if( IsErr ) return this;
+      else {
+        handler( val );
+        return this;
+      }
+    }
+    #endregion
     
-    public Result<TV, E> OnOk<TV, VE>(Result<TV, VE> result) where VE : E {
+
+    #region Then Method Overloads
+    public Result<TV, E> Then<TV, VE>(Result<TV, VE> result) where VE : E 
+    {
       if( IsErr ) return Result<TV, E>.Err( err );
       
       if( result.IsErr ) return Result<TV, E>.Err( result.err );
@@ -159,14 +172,25 @@ namespace Michaelolof.MResult
       else return Result<TV, E>.Ok( result.val );            
     }
 
-    public Result<TV, E> OnOk<TV, VE>(Func<Result<TV, VE>> handler ) where VE : E {
+    public Result<TV, E> Then<TV, VE>(Func<Result<TV, VE>> handler ) where VE : E 
+    {
       if( IsErr ) return Result<TV, E>.Err( err );
-      else return OnOk( handler() );
+      else return Then( handler() );
     }
 
-    public Result<TV, E> OnOk<TV, VE>(Func<V, Result<TV, VE>> handler ) where VE : E {
+    public Result<TV, E> Then<TV, VE>(Func<V, Result<TV, VE>> handler ) where VE : E 
+    {
       if( IsErr ) return Result<TV, E>.Err( err );
-      else return OnOk( handler( val ) );
+      else return Then( handler( val ) );
+    }
+
+    public Result<V, E> Then(Action<V> handler)
+    {
+      if( IsErr ) return this;
+      else {
+        handler(val);
+        return this;
+      }
     }
     #endregion
 
@@ -176,6 +200,12 @@ namespace Michaelolof.MResult
     {
       if( IsOk ) return Result<V, TE>.Ok( val );
       else return Result<V, TE>.Err( err );
+    }
+
+    public Result<V, TE> OnErr<TE>(Func<TE> handler)
+    {
+      if( IsOk ) return Result<V, TE>.Ok( val );
+      else return Result<V, TE>.Err( handler() );
     }
 
     public Result<V, TE> OnErr<TE>(Func<E, TE> handler) 
@@ -192,15 +222,18 @@ namespace Michaelolof.MResult
         return this;
       }
     }
+    #endregion
 
-    public Result<V, TE> OnErr<TE, EV>(Result<EV,TE> result) where EV : V
+
+    #region Catch Method Overloads
+    public Result<V, TE> Catch<TE, EV>(Result<EV,TE> result) where EV : V
     {
       if( IsOk ) return Result<V, TE>.Ok( val );
       else if( result.IsOk ) return Result<V, TE>.Ok( result.val );
       else return Result<V, TE>.Err( result.err );
     }
 
-    public Result<V, TE> OnErr<TE, EV>(Func<Result<EV, TE>> handler ) where EV : V
+    public Result<V, TE> Catch<TE, EV>(Func<Result<EV, TE>> handler ) where EV : V
     {
       if( IsOk ) return Result<V, TE>.Ok( val );
       var result = handler();
@@ -208,12 +241,21 @@ namespace Michaelolof.MResult
       else return Result<V, TE>.Err( result.err );
     }
 
-    public Result<V, TE>  OnErr<TE, EV>(Func<E, Result<EV, TE>> handler ) where EV : V
+    public Result<V, TE> Catch<TE, EV>(Func<E, Result<EV, TE>> handler ) where EV : V
     {
       if( IsOk ) return Result<V, TE>.Ok( val );
       var result = handler(err);
       if( result.IsOk ) return Result<V, TE>.Ok( result.val );
       else return Result<V, TE>.Err( result.err );
+    }
+
+    public Result<V, E> Catch(Action<E> handler)
+    {
+      if( IsOk ) return this;
+      else {
+        handler(err);
+        return this;
+      }
     }
     #endregion
 

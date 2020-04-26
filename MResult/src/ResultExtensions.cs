@@ -6,15 +6,15 @@ namespace Michaelolof.MResult
   public static class ResultExtensions
   {
     public static Result<V, E> ToOk<V, E>(this V val) => Result<V, E>.Ok( val );
+    public static Result<V, Exception> ToOk<V>(this V val) => Result<V, Exception>.Ok( val );
     public static Result<V, E> ToErr<V, E>(this E err) => Result<V, E>.Err( err );
+    public static Result<V, Exception> ToErr<V>(this Exception err) => Result<V, Exception>.Err( err );
 
     public static T Merge<T>(this Result<T, T> result) {
       var (var, err) = result.GetValueAndErr();
       if( result.IsOk ) return var;
       else return err;
     }
-
-    public static T MergeResult<T>(this (T, T) valAndErr ) => valAndErr.Item1 != null ? valAndErr.Item1 : valAndErr.Item2;
 
     public static async Task<Result<T,Exception>> ToResult<T>(this Task<T> task) {
       try {
