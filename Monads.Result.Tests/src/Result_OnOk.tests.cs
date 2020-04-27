@@ -1,7 +1,7 @@
 using Xunit;
 using System;
 
-namespace Michaelolof.MResult.Tests
+namespace Michaelolof.Monads.Result.Tests
 {
 
   public class Result_OnOk__Tests

@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace Michaelolof.MResult
+namespace Michaelolof.Monads.Result
 {
   public static class ResultExtensions
   {

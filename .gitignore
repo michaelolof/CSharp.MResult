@@ -1,5 +1,5 @@
 .vscode
-MResult/bin
-MResult/obj
-MResult.Tests/bin
-MResult.Tests/obj
+Monads.Result/bin
+Monads.Result/obj
+Monads.Result.Tests/bin
+Monads.Result.Tests/obj

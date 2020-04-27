@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MResult\MResult.csproj" />
+    <ProjectReference Include="..\Monads.Result\Monads.Result.csproj" />
   </ItemGroup>
 
 </Project>
