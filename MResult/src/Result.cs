@@ -17,10 +17,14 @@ namespace Michaelolof.Result
   public class Result<V, E>
   {
 
+    #region Private Fields
     V val = default!;
     E err = default!;
     ResultType type = ResultType.Err;
-      
+    #endregion
+
+
+    #region Private Constructors      
     private Result(V val) 
     {
       this.type = ResultType.Val;
@@ -31,21 +35,25 @@ namespace Michaelolof.Result
       this.type = ResultType.Err;
       this.err = err;
     }
+    #endregion
 
 
+    #region Static Factories
     /// <summary>Creates an Ok/Truthy Result by assigning the argument to the Left Side (V) of the Result Monad</summary>
     public static Result<V, E> Ok(V val) => new Result<V, E>(val);
 
     /// <summary>Creates an Err/Falsy Result by assigning the argument to the Right Side (E) of the Result Monad</summary>
     public static Result<V, E> Err(E err) => new Result<V, E>(err);
+    #endregion
 
 
+    #region Properties
     /// <summary>Determines if the Result is Ok or exists in a truthy state</summary>
     public bool IsOk => this.type == ResultType.Val;
     
     /// <summary>Determines if the Result is Err or exists in a falsy state</summary>
     public bool IsErr => this.type == ResultType.Err;
-
+    #endregion
 
 
     #region Match Method Overloads
@@ -299,6 +307,8 @@ namespace Michaelolof.Result
     }
     #endregion
 
+
+    #region Other Methods
     /// <summary>If the Result is truthy, it returns the value else returns the default value</summary>
     public V GetValueOrDefault(V defaultVal) => IsOk ? val : defaultVal;
 
@@ -307,9 +317,17 @@ namespace Michaelolof.Result
 
     /// <summary>Returns the value and err of the result in a tuple. CAUTION as both value or error may exist in thier default states.</summary>
     public (V, E) GetValueAndErr() => (val, err);
+    #endregion
 
 
+    #region Operators
+    public static implicit operator Result<V, E>(V val) => new Result<V, E>( val );
 
+    public static implicit operator Result<V, E>(E err) => new Result<V, E>( err );    
+    #endregion
+
+
+    #region Private Methods
     private Result<TV, TE> flattenOkResult<TV, TE, VE, EV>(Func<V, Result<TV,VE>> onOk) where TE : class, VE
     {
       return flattenOkResult<TV, TE, VE, EV>( onOk( val ) );
@@ -331,9 +349,9 @@ namespace Michaelolof.Result
       if( onErr.IsOk ) return Result<TV, TE>.Ok( (onErr.val as TV)! );
       else return Result<TV, TE>.Err( onErr.err );
     }
+    #endregion
 
   }
-
 
 }
 
