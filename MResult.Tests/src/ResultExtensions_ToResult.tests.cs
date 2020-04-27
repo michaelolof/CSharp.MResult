@@ -2,7 +2,7 @@ using Xunit;
 using System;
 using System.Threading.Tasks;
 
-namespace Michaelolof.Result.Tests
+namespace Michaelolof.MResult.Tests
 {
 
   public class ResultExtensions_ToResult__Tests

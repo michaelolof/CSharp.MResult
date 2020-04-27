@@ -1,7 +1,7 @@
 using System;
 using Xunit;
 
-namespace Michaelolof.Result.Tests
+namespace Michaelolof.MResult.Tests
 {
 
   public class ResultExtensions_ToOk__Tests

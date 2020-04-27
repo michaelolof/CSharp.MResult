@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace Michaelolof.Result
+namespace Michaelolof.MResult
 {
   public static class ResultExtensions
   {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Michaelolof.Result
+namespace Michaelolof.MResult
 {
 
   enum ResultType

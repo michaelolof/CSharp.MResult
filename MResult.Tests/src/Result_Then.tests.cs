@@ -1,7 +1,7 @@
 using Xunit;
 using System;
 
-namespace Michaelolof.Result.Tests
+namespace Michaelolof.MResult.Tests
 {
 
   public class Result_Then__Tests
