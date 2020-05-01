@@ -404,8 +404,9 @@ namespace Michaelolof.Monads.Result
   
 
     #region Awaiter Implementation
-    public static TaskAwaiter<Result<V,E>> GetAwaiter<V,E>(this Task<Result<V,E>> result) where E : Exception => 
-      result.GetContinued().GetAwaiter();
+    public static TaskAwaiter<Exception> GetAwaiter<V,E>(this Task<Result<V,E>> result) where E : Exception => 
+      throw new NotImplementedException("You can't await this type");
+      // result.GetContinued().GetAwaiter();
 
     public static ConfiguredTaskAwaitable<Result<V,E>> ConfigureAwait<V,E>(this Task<Result<V,E>> result, bool continueOnCapturedContext) where E : Exception => 
       result.GetContinued().ConfigureAwait(continueOnCapturedContext);
