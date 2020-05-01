@@ -14,7 +14,6 @@ namespace Michaelolof.Monads.Result.Tests
 
       var (val, err) = result.GetValueAndErr();
 
-      Assert.True( result is Result<int, Exception> );
       Assert.True( val == 20 );
       Assert.True( err == null );
     }
@@ -27,7 +26,6 @@ namespace Michaelolof.Monads.Result.Tests
 
       var (val, err) = result.GetValueAndErr();
 
-      Assert.True( result is Result<Tokens, Exception> );
       Assert.True( val is Tokens );
       Assert.True( err is null );
 

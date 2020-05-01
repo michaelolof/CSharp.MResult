@@ -18,7 +18,6 @@ namespace Michaelolof.Monads.Result.Tests
       var (val, err) = result.GetValueAndErr();
 
       Assert.True( resultingTask is Task<Result<int, Exception>> );
-      Assert.True( result is Result<int, Exception> );
       Assert.True( val == 30 );
       Assert.True( err == null );
     }
@@ -33,7 +32,6 @@ namespace Michaelolof.Monads.Result.Tests
       var (val, err) = result.GetValueAndErr();
 
       Assert.True( resultingTask is Task<Result<int, Exception>> );
-      Assert.True( result is Result<int, Exception> );
       Assert.True( val == 0 );
       Assert.True( err is Exception );
       Assert.True( err.Message == "Nothing" );

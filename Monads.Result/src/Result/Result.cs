@@ -14,7 +14,7 @@ namespace Michaelolof.Monads.Result
   ///</summary>  
   /// <typeparam name="V">Type of Value/Left field</typeparam>
   /// <typeparam name="E">Type of Err/Right field</typeparam>
-  public class Result<V, E>
+  public struct Result<V, E>
   {
 
     #region Private Fields

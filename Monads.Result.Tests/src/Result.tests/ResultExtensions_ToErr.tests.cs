@@ -14,7 +14,6 @@ namespace Michaelolof.Monads.Result.Tests
 
       var (val, err) = result.GetValueAndErr();
 
-      Assert.True( result is Result<string, int> );
       Assert.True( val == null );
       Assert.True( err == 20 );
     }
@@ -26,7 +25,6 @@ namespace Michaelolof.Monads.Result.Tests
 
       var (val, err) = result.GetValueAndErr();
 
-      Assert.True( result is Result<int, Exception> );
       Assert.True( val == 0 );
       Assert.True( err is Exception );
       Assert.True( err.Message == "Nothing" );
