@@ -145,6 +145,45 @@ namespace Michaelolof.Monads.Result
         return ex as E;
       }
     }
+
+    public static async Task<Result<TV,E>> Then<V,E,TV,VE>(this Task<Result<V,E>> result, Func<V,Task<Result<TV,VE>>> handler) where VE : E where E : Exception
+    {
+     try {
+        var awaitedResult = (await result);
+        var (val, err) = awaitedResult.GetValueAndErr();
+        if( awaitedResult.IsErr ) return err;
+        return await result.Then( await handler( val ) );
+      }
+      catch(Exception ex) {
+        return ex as E;
+      }
+    }
+
+    public static async Task<Result<TV,E>> Then<V,E,TV,VE>(this Task<Result<V,E>> result, Func<Task<Result<TV,VE>>> handler) where VE : E where E : Exception
+    {
+      try {
+        var awaitedResult = (await result);
+        var (val, err) = awaitedResult.GetValueAndErr();
+        if( awaitedResult.IsErr ) return err;
+        return await result.Then( await handler() );
+      }
+      catch(Exception ex) {
+        return ex as E;
+      }
+    }
+
+    public static async Task<Result<TV,E>> Then<V,E,TV,VE>(this Task<Result<V,E>> result, Task<Result<TV,VE>> handler) where VE : E where E : Exception
+    {
+      try {
+        var awaitedResult = (await result);
+        var (val, err) = awaitedResult.GetValueAndErr();
+        if( awaitedResult.IsErr ) return err;
+        return await result.Then( await handler );
+      }
+      catch(Exception ex) {
+        return ex as E;
+      }
+    }
     #endregion
 
 

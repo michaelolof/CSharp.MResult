@@ -1,5 +1,6 @@
 ﻿using System;
 
+
 namespace Michaelolof.Monads.Result
 {
 
@@ -18,8 +19,8 @@ namespace Michaelolof.Monads.Result
   {
 
     #region Private Fields
-    V val;
-    E err;
+    internal V val;
+    internal E err;
     ResultType type;
     #endregion
 
@@ -173,8 +174,8 @@ namespace Michaelolof.Monads.Result
     /// <summary>Gets Excecuted when the Result is ok and Propagates the transformed Result. Here you can safely access the value of the monad and transform/return it.</summary>
     public Result<TV, E> OnOk<TV>(TV value) 
     { 
-      if( IsErr ) return Result<TV, E>.Err( err );
-      else return Result<TV, E>.Ok( value );
+      if( IsErr ) return err;
+      else return value;
     }
 
     /// <summary>Gets Excecuted when the Result is ok and Propagates the transformed Result. Here you can safely access the value of the monad and transform/return it.</summary>   
@@ -328,7 +329,7 @@ namespace Michaelolof.Monads.Result
     #region Operators
     public static implicit operator Result<V, E>(V val) => new Result<V, E>( val );
 
-    public static implicit operator Result<V, E>(E err) => new Result<V, E>( err );    
+    public static implicit operator Result<V, E>(E err) => new Result<V, E>( err );
     #endregion
 
 

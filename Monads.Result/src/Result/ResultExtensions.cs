@@ -34,6 +34,104 @@ namespace Michaelolof.Monads.Result
         return Result<T,Exception>.Err( ex );
       }
     }
+
+    public async static Task<Result<V,E>> Flip<V,E>(this Result<Task<V>,E> result) where E : Exception
+    {
+      var (taskVal, err) = result.GetValueAndErr();
+      if( err != null ) return err;
+      try { 
+        return await taskVal;
+      } 
+      catch(Exception ex) {
+        return ex as E;
+      }
+    }
+
+    public static bool Exists<T>(this T value) => value != null;
+
+
+    #region OnOk Overloads
+    public async static Task<Result<TV,E>> OnOk<V,E,TV>(this Result<Task<V>,E> result, TV value) where E : Exception
+    {
+      if( result.IsErr ) return result.err;     
+      try {
+        var val = await result.val;
+        return value;
+      } 
+      catch (Exception ex) {
+        return ex as E;
+      }
+    }
+
+    public async static Task<Result<TV,E>> OnOk<V,E,TV>(this Result<Task<V>,E> result, Func<TV> handler) where E : Exception
+    {
+      if( result.IsErr ) return result.err;
+      try {
+        var val = await result.val;
+        return handler();
+      } 
+      catch (Exception ex) {
+        return ex as E;
+      }     
+    }
+
+    public async static Task<Result<TV,E>> OnOk<V,E,TV>(this Result<Task<V>,E> result, Func<V,TV> handler) where E : Exception
+    {
+      if( result.IsErr ) return result.err;
+      try {
+        var val = await result.val;
+        return handler( val );
+      }
+      catch(Exception ex) {
+        return ex as E;
+      }
+    }
+    #endregion
+
+
+    #region Then Overloads
+    public async static Task<Result<TV,E>> Then<V,E,TV,VE>(this Result<Task<V>,E> result, Result<TV,VE> value) where E : Exception where VE : E
+    {
+      if( result.IsErr ) return result.err;
+      try {
+        var val = await result.val;
+        if( value.IsErr ) return value.err;
+        else return value.val;
+      }
+      catch(Exception ex) {
+        return ex as E;
+      }
+    }
+
+    public async static Task<Result<TV,E>> Then<V,E,TV,VE>(this Result<Task<V>,E> result, Func<Result<TV,VE>> handler) where E : Exception where VE : E
+    {
+      if( result.IsErr ) return result.err;
+      try {
+        var val = await result.val;
+        var value = handler();
+        if( value.IsErr ) return value.err;
+        else return value.val;
+      }
+      catch(Exception ex) {
+        return ex as E;
+      }
+    }
+
+    public async static Task<Result<TV,E>> Then<V,E,TV,VE>(this Result<Task<V>,E> result, Func<V,Result<TV,VE>> handler) where E : Exception where VE : E
+    {
+      if( result.IsErr ) return result.err;
+      try {
+        var val = await result.val;
+        var value = handler(val);
+        if( value.IsErr ) return value.err;
+        else return value.val;
+      }
+      catch(Exception ex) {
+        return ex as E;
+      }
+    }
+    #endregion
+
   }
 
 }
