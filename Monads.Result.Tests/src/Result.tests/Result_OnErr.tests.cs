@@ -18,19 +18,16 @@ namespace Michaelolof.Monads.Result.Tests
       var resultOne = currentResult.OnErr( "Something" );
       var resultTwo = currentResult.OnErr(() => new NotSupportedException());
       var resultThree = currentResult.OnErr(e => new NotSupportedException(e.Message));
-      var resultFour = currentResult.OnErr( e => Console.WriteLine(e.Message));
 
       // Act
       var (valOne, errOne) = resultOne.GetValueAndErr();
       var (valTwo, errTwo) = resultTwo.GetValueAndErr();
       var (valThree, errThree) = resultThree.GetValueAndErr();
-      var (valFour, errFour) = resultFour.GetValueAndErr();
 
       // Assert
       Assert.True(errOne == "Something" && valOne == 0, "First Overload" );
       Assert.True(errTwo is NotSupportedException && valTwo == 0, "Second Overload" );
       Assert.True(errThree is NotSupportedException && errThree.Message == "Nothing" && valThree == 0, "Third Overload");
-      Assert.True(errFour is Exception && errFour.Message == "Nothing" && valFour == 0, "Fourth Overload" );
 
     }
 
@@ -45,19 +42,16 @@ namespace Michaelolof.Monads.Result.Tests
       var resultOne = currentResult.OnErr( new Exception("One") );
       var resultTwo = currentResult.OnErr(() => "Two");
       var resultThree = currentResult.OnErr(e => new NotSupportedException(e.Message));
-      var resultFour = currentResult.OnErr( e => Console.WriteLine(e.Message));
 
       // Act
       var (valOne, errOne) = resultOne.GetValueAndErr();
       var (valTwo, errTwo) = resultTwo.GetValueAndErr();
       var (valThree, errThree) = resultThree.GetValueAndErr();
-      var (valFour, errFour) = resultFour.GetValueAndErr();
 
       // Assert
       Assert.True(errOne == null && valOne == "Current", "First Overload" );
       Assert.True(errTwo == null && valTwo == "Current", "Second Overload" );
       Assert.True(errThree == null && valThree == "Current", "Third Overload");
-      Assert.True(errFour == null && valFour == "Current", "Fourth Overload" );
 
     }
 

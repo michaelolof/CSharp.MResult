@@ -19,9 +19,9 @@ namespace Michaelolof.Monads.Result
   {
 
     #region Private Fields
-    internal V val;
-    internal E err;
-    ResultType type;
+    readonly internal V val;
+    readonly internal E err;
+    readonly ResultType type;
     #endregion
 
 
@@ -191,16 +191,6 @@ namespace Michaelolof.Monads.Result
       if( IsErr ) return Result<TV, E>.Err( err );
       else return OnOk( handler( val ) );
     }
-    
-    /// <summary>Gets Excecuted when the Result is ok and Propagates the transformed Result. Here you can safely access the value of the monad and transform/return it.</summary>
-    public Result<V, E> OnOk(Action<V> handler)
-    { 
-      if( IsErr ) return this;
-      else {
-        handler( val );
-        return this;
-      }
-    }
     #endregion
     
 
@@ -228,16 +218,6 @@ namespace Michaelolof.Monads.Result
       if( IsErr ) return Result<TV, E>.Err( err );
       else return Then( handler( val ) );
     }
-
-    /// <summary>Gets Excecuted when the Result is ok and Propagates a flattened transformed Result. Here you can safely access the value of the monad and transform/return it. This is useful when you a chaning multiple methods that return Results</summary>
-    public Result<V, E> Then(Action<V> handler)
-    {
-      if( IsErr ) return this;
-      else {
-        handler(val);
-        return this;
-      }
-    }
     #endregion
 
 
@@ -261,16 +241,6 @@ namespace Michaelolof.Monads.Result
     { 
       if( IsOk ) return Result<V, TE>.Ok( val );
       else return Result<V, TE>.Err( handler( err ) );
-    }
-
-    /// <summary>Gets Executed when the Result is Err/falsy and Propagates the transformed Result. Here you can safely access the err/right of your Result and transform/return it.</summary>
-    public Result<V, E> OnErr(Action<E> handler)
-    {
-      if( IsOk ) return this;
-      else { 
-        handler( err );
-        return this;
-      }
     }
     #endregion
 
@@ -300,16 +270,6 @@ namespace Michaelolof.Monads.Result
       var result = handler(err);
       if( result.IsOk ) return Result<V, TE>.Ok( result.val );
       else return Result<V, TE>.Err( result.err );
-    }
-
-    /// <summary>Gets Excecuted when the Result is err and Propagates a flattened transformed Result. Here you can safely access the err/right of the monad and transform/return it. This is useful when you a retrying with multiple methods that return Results</summary>
-    public Result<V, E> Catch(Action<E> handler)
-    {
-      if( IsOk ) return this;
-      else {
-        handler(err);
-        return this;
-      }
     }
     #endregion
 

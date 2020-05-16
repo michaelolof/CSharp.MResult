@@ -1,12 +1,29 @@
 using System;
 using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
+using System.Collections.Generic;
+using System.Linq;
 
 
 namespace Michaelolof.Monads.Result
 {
   public static class TaskResultExtensions
   {
+
+    #region Converters
+    public static async Task<Result<IList<V>,E>> ToResult<V,E>(this Task<Partitions<V,E>> partitions) where E : Exception
+    {
+      try {
+        var awaited = await partitions;
+        if( awaited.HasErr() ) return awaited.GetErr().First();
+        else return Result<IList<V>,E>.Ok( awaited.GetVal() );
+      }
+      catch(Exception ex) {
+        return ex as E;
+      }
+    }
+    #endregion
+
 
     #region Other Methods
     public static async Task<bool> IsOk<V,E>(this Task<Result<V,E>> result)
@@ -91,16 +108,6 @@ namespace Michaelolof.Monads.Result
         return ex as E;
       }
     }
-
-    public static async Task<Result<V,E>> OnOk<V,E>(this Task<Result<V,E>> result, Action<V> handler) where E : Exception
-    {
-      try {
-        return (await result).OnOk( handler );
-      }
-      catch (Exception ex) {
-        return ex as E;
-      }
-    }
     #endregion
 
 
@@ -127,16 +134,6 @@ namespace Michaelolof.Monads.Result
     }
 
     public async static Task<Result<TV,E>> Then<V,E,TV,VE>(this Task<Result<V,E>> result, Func<V, Result<TV,VE>> handler) where VE : E where E : Exception
-    {
-      try {
-        return (await result).Then( handler );
-      }
-      catch(Exception ex) {
-        return ex as E;
-      }
-    }
-
-    public async static Task<Result<V,E>> Then<V,E>(this Task<Result<V,E>> result, Action<V> handler) where E : Exception
     {
       try {
         return (await result).Then( handler );
@@ -220,17 +217,6 @@ namespace Michaelolof.Monads.Result
         return ex as TE;
       }
     }
-
-    public static async Task<Result<V,E>> OnErr<V,E>(this Task<Result<V,E>> result, Action<E> handler) where E : Exception
-    {
-      try {
-        return (await result).OnErr( handler );
-      }
-      catch (Exception ex)
-      {
-        return ex as E;
-      }
-    }
     #endregion
 
 
@@ -263,16 +249,6 @@ namespace Michaelolof.Monads.Result
       }
       catch(Exception ex) {
         return ex as TE;
-      }
-    }
-
-    public async static Task<Result<V,E>> Catch<V,E>(this Task<Result<V,E>> result, Action<E> handler) where E : Exception
-    {
-      try {
-        return (await result).Catch( handler );
-      }
-      catch(Exception ex) {
-        return ex as E;
       }
     }
     #endregion

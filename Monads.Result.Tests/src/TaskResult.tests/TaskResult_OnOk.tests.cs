@@ -19,19 +19,16 @@ namespace Michaelolof.Monads.Result.Tests
       var resultOne = currentFufilledTask.OnOk( "Test" ).Result;
       var resultTwo = currentFufilledTask.OnOk( () => "Test" ).Result;
       var resultThree = currentFufilledTask.OnOk( b => b + 5 ).Result;
-      var resultFour = currentFufilledTask.OnOk( v => Console.WriteLine($"Value is {v}") ).Result;
 
       // Act
       var (valOne, errOne) = resultOne.GetValueAndErr();
       var (valTwo, errTwo) = resultTwo.GetValueAndErr();
       var (valThree, errThree) = resultThree.GetValueAndErr();
-      var (valFour, errFour) = resultFour.GetValueAndErr();
 
       // Assert
       Assert.True( valOne == "Test" && errOne == null );
       Assert.True( valTwo == "Test" && errTwo == null );
       Assert.True( valThree == 25 && errThree == null );
-      Assert.True( valFour == 20 && errFour == null );
 
     }
 
@@ -47,20 +44,16 @@ namespace Michaelolof.Monads.Result.Tests
       var resultOne = await currentUnfufilledTask.OnOk( "Test" );
       var resultTwo = currentUnfufilledTask.OnOk( () => "Test" );
       var resultThree = currentUnfufilledTask.OnOk( b => b + 5 );
-      var resultFour = currentUnfufilledTask.OnOk( v => Console.WriteLine($"Value is {v}") );
 
       // Act
       var (valOne, errOne) = resultOne.GetValueAndErr();
       var (valTwo, errTwo) = await resultTwo.GetValueAndErr();
       var (valThree, errThree) = await resultThree.GetValueAndErr();
-      var (valFour, errFour) = await resultFour.GetValueAndErr();
 
       // Assert
       Assert.True( valOne == null && errOne is Exception && errOne.Message == "Bad Shit" );
       Assert.True( valTwo == null && errTwo is Exception && errTwo.Message == "Bad Shit" );
       Assert.True( valThree == 0 && errThree is Exception && errTwo.Message == "Bad Shit" );
-      Assert.True( valFour == 0 && errFour is Exception && errTwo.Message == "Bad Shit" );
-
 
       //----------------------------------------------------------------
       async Task<Result<int, Exception>> unfufillTask(int n) { 

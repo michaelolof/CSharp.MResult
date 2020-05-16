@@ -17,19 +17,16 @@ namespace Michaelolof.Monads.Result.Tests
       var resultOne = currentResult.OnOk( "Test" );
       var resultTwo = currentResult.OnOk( () => "Test" );
       var resultThree = currentResult.OnOk( b => b + 5 );
-      var resultFour = currentResult.OnOk( v => Console.WriteLine($"Value is {v}") );
 
       // Act
       var (valOne, errOne) = resultOne.GetValueAndErr();
       var (valTwo, errTwo) = resultTwo.GetValueAndErr();
       var (valThree, errThree) = resultThree.GetValueAndErr();
-      var (valFour, errFour) = resultFour.GetValueAndErr();
 
       // Assert
       Assert.True( valOne == "Test" && errOne == null );
       Assert.True( valTwo == "Test" && errTwo == null );
       Assert.True( valThree == 25 && errThree == null );
-      Assert.True( valFour == 20 && errFour == null );
 
     }
 
@@ -44,19 +41,16 @@ namespace Michaelolof.Monads.Result.Tests
       var resultOne = currentResult.OnOk( "Test" );
       var resultTwo = currentResult.OnOk( () => "Test" );
       var resultThree = currentResult.OnOk( b => b + 5 );
-      var resultFour = currentResult.OnOk( v => Console.WriteLine($"Value is {v}") );
 
       // Act
       var (valOne, errOne) = resultOne.GetValueAndErr();
       var (valTwo, errTwo) = resultTwo.GetValueAndErr();
       var (valThree, errThree) = resultThree.GetValueAndErr();
-      var (valFour, errFour) = resultFour.GetValueAndErr();
 
       // Assert
       Assert.True( valOne == null && errOne is Exception && errOne.Message == "Nothing" );
       Assert.True( valTwo == null && errTwo is Exception && errTwo.Message == "Nothing" );
       Assert.True( valThree == 0 && errThree is Exception && errThree.Message == "Nothing" );
-      Assert.True( valFour == 0 && errFour is Exception && errFour.Message == "Nothing" );
     }
 
   }
