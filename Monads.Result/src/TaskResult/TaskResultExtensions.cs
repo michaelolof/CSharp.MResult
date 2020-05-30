@@ -11,12 +11,12 @@ namespace Michaelolof.Monads.Result
   {
 
     #region Converters
-    public static async Task<Result<IList<V>,E>> ToResult<V,E>(this Task<Partitions<V,E>> partitions) where E : Exception
+    public static async Task<Result<IEnumerable<V>,E>> ToResult<V,E>(this Task<Partitions<V,E>> partitions) where E : Exception
     {
       try {
         var awaited = await partitions;
         if( awaited.HasErr() ) return awaited.GetErr().First();
-        else return Result<IList<V>,E>.Ok( awaited.GetVal() );
+        else return Result<IEnumerable<V>,E>.Ok( awaited.GetVal() );
       }
       catch(Exception ex) {
         return ex as E;
@@ -181,6 +181,21 @@ namespace Michaelolof.Monads.Result
         return ex as E;
       }
     }
+
+    public async static Task<Result<TV,E>> Then<V,E,TV,VE>(this Result<V,E> result, Func<V,Task<Result<TV,VE>>> handler) where E : Exception where VE : E
+    {
+      var (val, err) = result.GetValueAndErr();
+      if( result.IsErr ) return err;
+      try {
+        var awaited = await handler( val );
+        var (aval, aerr) = awaited.GetValueAndErr();
+        if( awaited.IsErr ) return aerr;
+        else return aval;
+      }
+      catch(Exception ex) {
+        return (ex as E)!;
+      }
+    }
     #endregion
 
 
@@ -249,6 +264,42 @@ namespace Michaelolof.Monads.Result
       }
       catch(Exception ex) {
         return ex as TE;
+      }
+    }
+
+    public async static Task<Result<V,TE>> Catch<V,E,EV,TE>(this Task<Result<V,E>> result, Task<Result<EV,TE>> alterative) where TE : Exception where EV : V
+    {
+      try {
+        var awaitedResult = await result;
+        var (val, err) = awaitedResult.GetValueAndErr();
+        if( awaitedResult.IsOk ) return val;
+        var awaited = await alterative;
+        var (aval, aerr) = awaited.GetValueAndErr();
+        if( awaited.IsOk ) return aval;
+        else return aerr;
+      }
+      catch(Exception ex) {
+        return (ex as TE)!;
+      }
+    }
+
+    public static Task<Result<V,TE>> Catch<V,E,EV,TE>(this Task<Result<V,E>> result, Func<Task<Result<EV,TE>>> handler) where TE : Exception where EV : V
+      => result.Catch( handler() );
+
+
+    public async static Task<Result<V,TE>> Catch<V,E,EV,TE>(this Task<Result<V,E>> result, Func<E,Task<Result<EV,TE>>> handler) where TE : Exception where EV : V
+    {
+      try {
+        var awaitedResult = await result;
+        var (val, err) = awaitedResult.GetValueAndErr();
+        if( awaitedResult.IsOk ) return val;
+        var awaited = await handler( err );
+        var (aval, aerr) = awaited.GetValueAndErr();
+        if( awaited.IsOk ) return aval;
+        else return aerr;
+      }
+      catch(Exception ex) {
+        return (ex as TE)!;
       }
     }
     #endregion

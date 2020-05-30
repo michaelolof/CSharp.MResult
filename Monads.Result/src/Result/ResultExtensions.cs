@@ -139,8 +139,27 @@ namespace Michaelolof.Monads.Result
         return ex as E;
       }
     }
+
+    public async static Task<Result<TV,E>> Then<V,E,TV,VE>(this Result<V,E> result, Func<V,Task<Result<TV,VE>>> handler) where E : Exception where VE : E
+    {
+      var (val, err) = result.GetValueAndErr();
+      if( result.IsErr ) return err;
+      try {
+        var awaited = await handler( val );
+        var (aval, aerr) = awaited.GetValueAndErr();
+        if( awaited.IsErr ) return aerr;
+        else return aval;
+      }
+      catch(Exception ex) {
+        return (ex as E)!;
+      }
+    }
     #endregion
 
+
+    #region Catch Overloads
+    
+    #endregion
   }
 
 }

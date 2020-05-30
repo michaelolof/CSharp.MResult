@@ -230,7 +230,7 @@ namespace Michaelolof.Monads.Result
         return false;
       }
     } 
-    public static async Task<IList<V>> GetVal<V,E>(this Task<Partitions<V,E>> partitions) {
+    public static async Task<IEnumerable<V>> GetVal<V,E>(this Task<Partitions<V,E>> partitions) {
       try {
         return (await partitions).val;
       }
@@ -239,7 +239,7 @@ namespace Michaelolof.Monads.Result
       }
 
     }
-    public static async Task<IList<E>> GetErr<V,E>(this Task<Partitions<V,E>> partitions) where E : Exception
+    public static async Task<IEnumerable<E>> GetErr<V,E>(this Task<Partitions<V,E>> partitions) where E : Exception
     {
       try {
         return (await partitions).err;
@@ -249,7 +249,7 @@ namespace Michaelolof.Monads.Result
         return new List<E>(){ ex as E };
       }
     }
-    public static async Task<(IList<V>,IList<E>)> GetValAndErr<V,E>(this Task<Partitions<V,E>> partitions) where E : Exception
+    public static async Task<(IEnumerable<V>,IEnumerable<E>)> GetValAndErr<V,E>(this Task<Partitions<V,E>> partitions) where E : Exception
     {
       try {
         return ((await partitions).GetVal(), (await partitions).GetErr());
@@ -457,7 +457,7 @@ namespace Michaelolof.Monads.Result
       => partitions.OnOks( handler() );
     
 
-    public static async Task<Partitions<TV,E>> OnOks<V,E,TV>(this Task<Partitions<V,E>> partitions, Func<IList<V>, IList<TV>> handler) where E : Exception
+    public static async Task<Partitions<TV,E>> OnOks<V,E,TV>(this Task<Partitions<V,E>> partitions, Func<IEnumerable<V>, IList<TV>> handler) where E : Exception
     {
       try {
         var awaitedP = await partitions;
@@ -470,7 +470,7 @@ namespace Michaelolof.Monads.Result
       }      
     }
 
-    public static async Task<Partitions<V,E>> OnOks<V,E>(this Task<Partitions<V,E>> partitions, Action<IList<V>> handler ) where E : Exception
+    public static async Task<Partitions<V,E>> OnOks<V,E>(this Task<Partitions<V,E>> partitions, Action<IEnumerable<V>> handler ) where E : Exception
     {
       try {
         var awaitedP = await partitions;
@@ -483,6 +483,7 @@ namespace Michaelolof.Monads.Result
       }
     }
     #endregion
+
 
     #region OnErr Overloads
     public static async Task<Partitions<V,TE>> OnErr<V,E,TE>(this Task<Partitions<V,E>> partition, TE err) where TE : Exception
@@ -534,6 +535,62 @@ namespace Michaelolof.Monads.Result
         return ex.ToPartitions<V,TE>();
       }
     }    
+    #endregion
+    public static async Task<Partitions<V,TE>> OnErrs<V,E,EV,TE>(this Task<Partitions<V,E>> partitions, Func<IEnumerable<E>,Partitions<EV,TE>> handler) where E : Exception where TE : E where EV : V
+    {
+      try {
+        return (await partitions).OnErrs( handler );
+      }
+      catch(Exception ex)
+      {
+        return ex.ToPartitions<V,TE>();
+      }
+    }
+
+    public static async Task<Partitions<V,TE>> OnErrs<V,E,EV,TE>(this Task<Partitions<V,E>> partitions, Func<IEnumerable<E>,Task<Partitions<EV,TE>>> handler) where E : Exception where TE : E where EV : V
+    {
+      try {
+        var ap = await partitions;
+        var vals = ap.GetVal();
+        var errs = ap.GetErr();
+
+        var handledParts = await handler( errs );
+        var handledVals = handledParts.GetVal();
+        var handledErrs = handledParts.GetErr();
+
+        vals.AddRange( handledVals as IEnumerable<V> );
+        return (vals, handledErrs); 
+      }
+      catch(Exception ex) 
+      {
+        return ex.ToPartitions<V,TE>();  
+      }
+    }
+
+    public static async Task<Partitions<V,TE>> OnErrs<V,E,EV,TE>(this Task<Partitions<V,E>> partitions, Func<Task<IEnumerable<E>>,Task<Partitions<EV,TE>>> handler) where E : Exception where TE : E where EV : V
+    {
+      try {
+        var errs = partitions.GetErr();
+
+        var handledParts = await handler( errs );
+        var handledVals = handledParts.GetVal();
+        var handledErrs = handledParts.GetErr();
+
+        var vals = await partitions.GetVal();
+
+        vals.AddRange( handledVals as IEnumerable<V> );
+        return (vals, handledErrs); 
+      }
+      catch(Exception ex) 
+      {
+        return ex.ToPartitions<V,TE>();  
+      }
+    }
+
+
+    #region OnErrs Overloads
+
+
     #endregion
 
 

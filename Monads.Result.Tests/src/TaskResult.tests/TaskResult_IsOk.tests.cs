@@ -1,6 +1,8 @@
 using System;
 using Xunit;
 using System.Threading.Tasks;
+using System.Linq;
+
 
 namespace Michaelolof.Monads.Result.Tests
 {
@@ -51,7 +53,6 @@ namespace Michaelolof.Monads.Result.Tests
 
       Assert.True( isOk == false );
     }
-
 
   }
 
