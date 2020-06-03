@@ -249,15 +249,15 @@ namespace Michaelolof.Monads.Result
     /// <summary>Gets Excecuted when the Result is err and Propagates a flattened transformed Result. Here you can safely access the err/right of the monad and transform/return it. This is useful when you a retrying with multiple methods that return Results</summary>
     public Result<V, TE> Catch<TE, EV>(Result<EV,TE> result) where EV : V
     {
-      if( IsOk ) return Result<V, TE>.Ok( val );
-      else if( result.IsOk ) return Result<V, TE>.Ok( result.val );
-      else return Result<V, TE>.Err( result.err );
+      if( IsOk ) return val;
+      else if( result.IsOk ) return result.val;
+      else return result.err;
     }
 
     /// <summary>Gets Excecuted when the Result is err and Propagates a flattened transformed Result. Here you can safely access the err/right of the monad and transform/return it. This is useful when you a retrying with multiple methods that return Results</summary>
     public Result<V, TE> Catch<TE, EV>(Func<Result<EV, TE>> handler ) where EV : V
     {
-      if( IsOk ) return Result<V, TE>.Ok( val );
+      if( IsOk ) return val;
       var result = handler();
       if( result.IsOk ) return Result<V, TE>.Ok( result.val );
       else return Result<V, TE>.Err( result.err );

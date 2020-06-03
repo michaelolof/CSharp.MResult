@@ -268,8 +268,21 @@ namespace Michaelolof.Monads.Result
       }
     }
 
-    public static Task<Result<V,TE>> Catch<V,E,EV,TE>(this Task<Result<V,E>> result, Func<Task<Result<EV,TE>>> handler) where TE : Exception where EV : V
-      => result.Catch( handler() );
+    public async static Task<Result<V,TE>> Catch<V,E,EV,TE>(this Task<Result<V,E>> result, Func<Task<Result<EV,TE>>> handler) where TE : Exception where EV : V
+    {
+      try {
+        var awaitedResult = await result;
+        var (val, err) = awaitedResult.GetValueAndErr();
+        if( awaitedResult.IsOk ) return val;
+        var awaited = await handler();
+        var (aval, aerr) = awaited.GetValueAndErr();
+        if( awaited.IsOk ) return aval;
+        else return aerr;
+      }
+      catch(Exception ex) {
+        return (ex as TE)!;
+      }
+    }
 
 
     public async static Task<Result<V,TE>> Catch<V,E,EV,TE>(this Task<Result<V,E>> result, Func<E,Task<Result<EV,TE>>> handler) where TE : Exception where EV : V

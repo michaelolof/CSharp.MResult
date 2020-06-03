@@ -118,7 +118,11 @@ namespace Michaelolof.Monads.Result
       return (vals, partition.GetErr());
     }
 
-    public static Partitions<TV,E> OnOk<V,E,TV>(this Partitions<V,E> partition, Func<TV> handler ) => partition.OnOk( handler() );
+    public static Partitions<TV,E> OnOk<V,E,TV>(this Partitions<V,E> partition, Func<TV> handler ) 
+    { 
+      var vals = partition.GetVal().Select( v => handler());
+      return (vals, partition.GetErr());
+    }
 
     public static Partitions<TV,E> OnOk<V,E,TV>(this Partitions<V,E> partition, Func<V,TV> handler ) 
     {
