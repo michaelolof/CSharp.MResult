@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <PackageId>Michaelolof.Monads.Result</PackageId>
-    <Version>1.1.8</Version>
+    <Version>1.1.9</Version>
     <Authors>michaelolof</Authors>
     <Company>michaelolof</Company>
 

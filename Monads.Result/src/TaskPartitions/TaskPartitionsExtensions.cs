@@ -13,8 +13,7 @@ namespace Michaelolof.Monads.Result
     #region Converters
     public static Partitions<V,E> ToPartitions<V,E>(this E err) where E : Exception => (new List<V>(), new List<E>{err});
     public static Partitions<V,E> ToPartitions<V,E>(this Exception err) where E : Exception => (new List<V>(), new List<E>{err as E});
-    public static Task<Partitions<V,E>> ToPartitions<V,E>(this IEnumerable<V> vals) => Task.FromResult( new Partitions<V,E>( vals.ToList(), new List<E>()) );
-
+    
     private static async Task<Partitions<V,E>> ToPartitions<V,E,EnumV>(this Task<IList<Result<EnumV,E>>> results) where EnumV : IList<V> where E : Exception
     {
       try {
